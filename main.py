@@ -48,7 +48,7 @@ def main():
 
     try:
         generator = CalendarsGenerator()
-        calendars = generator.generate(response.data["data"])
+        calendars = generator.generate(response.data)
         calendars_paths = generator.save()
         calendars_generator_time = time.time() - schedule_parser_time
     except Exception as e:

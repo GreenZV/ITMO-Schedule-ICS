@@ -104,15 +104,10 @@ class CalendarsGenerator:
         self.calendars[calendar_name].add_component(event)
         return event
 
-    def generate(self, data: List[Dict[str, Any]]) -> Dict[str, Calendar]:
+    def generate(self, data: Dict[str, Any]) -> Dict[str, Calendar]:
         logger.info("Calendar generator started")
-        for day in data:
-            date_str = day.get("date")
-            if not date_str:
-                logger.warning("Getting date error")
-                continue
-
-            for lesson in day.get("lessons", []):
+        for date_str, lessons in data.items():
+            for lesson in lessons:
                 self._make_event(date_str=date_str, lesson=lesson)
 
         logger.info("Calendar generator finished")

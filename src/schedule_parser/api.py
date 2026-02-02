@@ -4,7 +4,7 @@ import requests
 import json
 import time
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 
 from config.schedule_parser.api import api_config
@@ -32,7 +32,18 @@ class APIClient:
         self.session.cookies.clear()
         self.session.cookies.update(cookies)
         logger.info(f"Cookies have been set: {len(cookies)} items")
-    
+
+    def _process_data(
+        self,
+        data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        result = {}
+        for day in data.get("data"):
+            date_str = day.get("date")
+            day.pop("date")
+            result[date_str] = day.get("lessons")
+        return result
+
     def request(
         self,
         authorization_token: str
@@ -55,10 +66,17 @@ class APIClient:
             
             if response.status_code == 200:
                 try:
-                    response_data = response.json()
+                    response_data = self._process_data(response.json())
                 except json.JSONDecodeError:
-                    response_data = response.text
-                
+                    return APIResponse(
+                        success=False,
+                        data=None,
+                        status_code=200,
+                        response_time=response_time,
+                        cookies_count=len(self.session.cookies),
+                        error="Non-json received"
+                    )
+
                 return APIResponse(
                     success=True,
                     data=response_data,
