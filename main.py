@@ -47,8 +47,8 @@ def main():
         sys.exit(1)
 
     try:
-        generator = CalendarsGenerator()
-        calendars = generator.generate(response.data)
+        generator = CalendarsGenerator(data_path)
+        calendars = generator.generate()
         calendars_paths = generator.save()
         calendars_generator_time = time.time() - schedule_parser_time
     except Exception as e:

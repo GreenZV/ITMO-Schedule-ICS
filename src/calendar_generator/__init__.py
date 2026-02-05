@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -11,8 +12,9 @@ from config.calendar_generator.__init__ import calendar_generator_config
 logger = logging.getLogger(__name__)
 
 class CalendarsGenerator:
-    def __init__(self):
+    def __init__(self, data_path: Path):
         self.calendars: Dict[str, Calendar] = {}
+        self.data_path = data_path
         self.moscow_tz = pytz.timezone("Europe/Moscow")
 
     def _make_event(self, date_str: str, lesson: Dict[str, Any]) -> Event:
@@ -104,7 +106,13 @@ class CalendarsGenerator:
         self.calendars[calendar_name].add_component(event)
         return event
 
-    def generate(self, data: Dict[str, Any]) -> Dict[str, Calendar]:
+    def _load_data(self) -> Dict[str, Any]:
+        with open(self.data_path, 'r', encoding="utf-8") as f:
+            data = json.load(f)
+        return data
+        
+    def generate(self) -> Dict[str, Calendar]:
+        data = self._load_data()
         logger.info("Calendar generator started")
         for date_str, lessons in data.items():
             for lesson in lessons:
